@@ -285,4 +285,66 @@ class test_HJsonProcessor {
         assertEquals(expected, actual)
 
     }
+
+    @Test
+    fun arrayObject() {
+        val D = "$"
+
+        val jsonString = """
+            {
+              ${D}type : ${D}ARRAY
+              ${D}elements : [
+                1
+                true
+                {}
+                hello
+              ]
+            }
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayObject {
+                primitive(1)
+                primitive(true)
+                objectJson { }
+                primitive("hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun listObject() {
+        val D = "$"
+
+        val jsonString = """
+            {
+              ${D}type : ${D}LIST
+              ${D}elements : [
+                1
+                true
+                {}
+                hello
+              ]
+            }
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            listObject {
+                primitive(1)
+                primitive(true)
+                objectJson { }
+                primitive("hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
 }

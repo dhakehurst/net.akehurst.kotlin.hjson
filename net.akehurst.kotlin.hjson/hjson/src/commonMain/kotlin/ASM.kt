@@ -287,13 +287,36 @@ data class HJsonNumber(
 data class HJsonString(
         val value: String
 ) : HJsonValue() {
+
+    companion object {
+        fun decode(encodedValue: String): HJsonString {
+            val value = encodedValue
+                    .replace("\\b", "\b")
+                    .replace("\\f", "\u000C")
+                    .replace("\\n", "\n")
+                    .replace("\\r", "\r")
+                    .replace("\\t", "\t")
+                    .replace("\\\"", "\"")
+                    .replace("\\\\", "\\")
+            return HJsonString(value)
+        }
+    }
+
+    val encodedValue: String = value
+            .replace("\\", "\\\\")
+            .replace("\b", "\\b")
+            .replace("\u000C", "\\f")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+            .replace("\"", "\\\"")
+
+
     override fun asString(): HJsonString {
         return this
     }
 
     override fun toJsonString(): String {
-        val escaped = this.value.replace("\"", "\\\"")
-        return """"${this.value}""""
+        return """"${this.encodedValue}""""
     }
 
     override fun toFormattedJsonString(indent: String, increment: String): String {
@@ -303,8 +326,8 @@ data class HJsonString(
     override fun toHJsonString(indent: String, increment: String): String {
         return when {
             0 == this.value.length -> "\"\""
-            this.value.contains("\n") -> """'''${this.value}'''"""
-            else -> "${this.value}"
+            this.value.contains("\n") -> """'''${this.encodedValue}'''"""
+            else -> "\"${this.encodedValue}\""
         }
     }
 }

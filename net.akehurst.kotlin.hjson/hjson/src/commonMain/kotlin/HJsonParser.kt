@@ -114,11 +114,11 @@ object HJsonParser {
                 }
                 scanner.hasNext(TOKEN_QUOTED_STRING) -> {
                     val value = scanner.next(TOKEN_QUOTED_STRING)
-                    valueStack.push(HJsonString(value.drop(1).dropLast(1)))
+                    valueStack.push(HJsonString.decode(value.drop(1).dropLast(1)))
                 }
                 scanner.hasNext(TOKEN_MULTILINE_STRING) -> {
                     val value = scanner.next(TOKEN_MULTILINE_STRING)
-                    valueStack.push(HJsonString(value.drop(3).dropLast(3)))
+                    valueStack.push(HJsonString.decode(value.drop(3).dropLast(3)))
                 }
                 scanner.hasNext(TOKEN_ARRAY_START) -> {
                     scanner.next(TOKEN_ARRAY_START)
@@ -211,26 +211,31 @@ object HJsonParser {
                     nameStack.push(name)
                     path.push(name)
                 }
-                scanner.hasNext(TOKEN_UNQUOTED_PROPERTY_NAME) && (valueStack.peek() is HJsonObject) -> {
+                scanner.hasNext(TOKEN_UNQUOTED_PROPERTY_NAME) && valueStack.elements.isNotEmpty() && valueStack.peek() is HJsonObject -> {
                     val value = scanner.next(TOKEN_UNQUOTED_PROPERTY_NAME)
-                    valueStack.push(HJsonString(value))
+                    valueStack.push(HJsonString.decode(value))
                 }
                 scanner.hasNext(TOKEN_TO_EOL_STRING) -> {
                     val value1 = scanner.next(TOKEN_TO_EOL_STRING)
-                    valueStack.push(HJsonString(value1.dropLast(1)))
-                    path.pop()
-                    val value = valueStack.pop()
-                    val peek = valueStack.peek()
-                    when (peek) {
-                        is HJsonArray -> {
-                            peek.addElement(value)
-                            path.push(peek.elements.size.toString())
+                    consumeEolOrWhitespaceOrComment(scanner)
+                    valueStack.push(HJsonString.decode(value1.dropLast(1)))
+                    if (scanner.hasNext(TOKEN_ARRAY_END) || scanner.hasNext(TOKEN_OBJECT_END)) {
+                        //delay
+                    } else {
+                        path.pop()
+                        val value = valueStack.pop()
+                        val peek = valueStack.peek()
+                        when (peek) {
+                            is HJsonArray -> {
+                                peek.addElement(value)
+                                path.push(peek.elements.size.toString())
+                            }
+                            is HJsonObject -> {
+                                val name = nameStack.pop()
+                                peek.setProperty(name, value)
+                            }
+                            else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class.simpleName}")
                         }
-                        is HJsonObject -> {
-                            val name = nameStack.pop()
-                            peek.setProperty(name, value)
-                        }
-                        else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class.simpleName}")
                     }
                 }
                 scanner.hasNext(TOKEN_EOL) -> {
