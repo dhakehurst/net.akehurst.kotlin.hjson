@@ -327,7 +327,8 @@ data class HJsonString(
         return when {
             0 == this.value.length -> "\"\""
             this.value.contains("\n") -> """'''${this.encodedValue}'''"""
-            else -> "\"${this.encodedValue}\""
+            this.value.contains(Regex(",|:|\\[|]|\\{|}")) -> "\"${this.encodedValue}\""
+            else -> "${this.encodedValue}"
         }
     }
 }
@@ -366,10 +367,6 @@ class HJsonArray : HJsonValue() {
     override fun toHJsonString(indent: String, increment: String): String {
         return when (elements.size) {
             0 -> "[]"
-            1 -> {
-                val element = this.elements[0].toHJsonString(indent + increment, increment)
-                return "[ ${element} ]"
-            }
             else -> {
                 val elements = this.elements.map {
                     indent + it.toHJsonString(indent + increment, increment)

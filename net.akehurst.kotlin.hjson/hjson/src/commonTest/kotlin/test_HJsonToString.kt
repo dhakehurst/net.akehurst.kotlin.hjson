@@ -147,7 +147,9 @@ class test_HJsonToString {
         val actual = json.toHJsonString()
 
         val expected = """
-            [ 1 ]
+            [
+              1
+            ]
         """.trimIndent()
 
         assertEquals(expected, actual)

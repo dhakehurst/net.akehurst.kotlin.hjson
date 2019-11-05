@@ -234,7 +234,7 @@ object HJsonParser {
                                 val name = nameStack.pop()
                                 peek.setProperty(name, value)
                             }
-                            else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class.simpleName}")
+                            else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class}")
                         }
                     }
                 }
@@ -244,26 +244,35 @@ object HJsonParser {
                     if (scanner.hasNext(TOKEN_ARRAY_END) || scanner.hasNext(TOKEN_OBJECT_END)) {
                         //delay
                     } else {
-                        path.pop()
-                        val value = valueStack.pop()
-                        val peek = valueStack.peek()
-                        when (peek) {
-                            is HJsonArray -> {
-                                peek.addElement(value)
-                                path.push(peek.elements.size.toString())
+                        if (1 == valueStack.elements.size) {
+                            //must be end of input!
+                            //TODO: check end of input
+                        } else {
+                            path.pop()
+                            val value = valueStack.pop()
+                            val peek = valueStack.peek()
+                            when (peek) {
+                                is HJsonArray -> {
+                                    peek.addElement(value)
+                                    path.push(peek.elements.size.toString())
+                                }
+                                is HJsonObject -> {
+                                    val name = nameStack.pop()
+                                    peek.setProperty(name, value)
+                                }
+                                else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class}")
                             }
-                            is HJsonObject -> {
-                                val name = nameStack.pop()
-                                peek.setProperty(name, value)
-                            }
-                            else -> throw HJsonParserException("Expected an Array or an Object but was a ${peek::class.simpleName}")
                         }
                     }
                 }
                 else -> throw HJsonParserException("Unexpected character at position ${scanner.position} - '${input.substring(scanner.position)}'")
             }
         }
-        doc.root = valueStack.pop()
+        if (1==valueStack.elements.size) {
+            doc.root = valueStack.pop()
+        } else {
+            throw HJsonParserException("invalid input,  probably an object or array is not closed")
+        }
         return doc
     }
 }
