@@ -65,6 +65,21 @@ class test_HJsonProcessor {
     }
 
     @Test
+    fun string_00() {
+
+        val jsonString = "00"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            primitive("00")
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
     fun number_1() {
 
         val jsonString = "1"
@@ -285,6 +300,28 @@ class test_HJsonProcessor {
         assertEquals(expected, actual)
 
     }
+
+    @Test
+    fun object_with_string() {
+
+        val jsonString = """
+        {
+          prop : Hello World
+        }
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString);
+
+        val expected = hjson("json") {
+            objectJson {
+                property("prop", "Hello World")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
 
     @Test
     fun arrayObject() {

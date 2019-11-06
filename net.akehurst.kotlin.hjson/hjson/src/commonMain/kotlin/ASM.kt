@@ -311,6 +311,8 @@ data class HJsonString(
             .replace("\"", "\\\"")
 
 
+    private val couldBeNumber : Boolean get()  =  this.value.toDoubleOrNull()!=null
+
     override fun asString(): HJsonString {
         return this
     }
@@ -328,6 +330,7 @@ data class HJsonString(
             0 == this.value.length -> "\"\""
             this.value.contains("\n") -> """'''${this.encodedValue}'''"""
             this.value.contains(Regex(",|:|\\[|]|\\{|}")) -> "\"${this.encodedValue}\""
+            this.couldBeNumber -> "\"${this.encodedValue}\""
             else -> "${this.encodedValue}"
         }
     }
