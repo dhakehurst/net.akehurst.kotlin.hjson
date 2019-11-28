@@ -1,5 +1,5 @@
 val version_kotlinx:String by project
-val version_korio:String  = "1.8.4"
+val version_korio:String  = "1.9.0"
 
 dependencies {
     commonMainImplementation("net.akehurst.kotlinx:kotlinx-collections:$version_kotlinx")
