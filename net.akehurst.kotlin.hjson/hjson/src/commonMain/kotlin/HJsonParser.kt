@@ -230,6 +230,7 @@ object HJsonParser {
                         if (peek is HJsonObject) {
                             val name = nameStack.pop()
                             peek.setProperty(name, value)
+                            doc.index[listOf(*path.elements.toTypedArray())] = peek
                             // handle different kinds of object!
                             when {
                                 // JsonReference
@@ -251,8 +252,10 @@ object HJsonParser {
                                     valueStack.pop()
                                     obj.property = peek.property
                                     valueStack.push(obj)
+                                    doc.index[listOf(*path.elements.toTypedArray())] = obj
                                 }
                             }
+
                         } else {
                             throw HJsonParserException("Expected an Object but was a ${peek::class}", scanner.line, scanner.col, scanner.extract)
                         }

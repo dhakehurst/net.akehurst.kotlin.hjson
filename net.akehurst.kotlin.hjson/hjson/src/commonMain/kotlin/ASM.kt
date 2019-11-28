@@ -38,6 +38,7 @@ class HJsonDocument(
         val SET = HJsonString("\$SET")
     }
 
+    val index = mutableMapOf<List<String>, HJsonValue>()
     val references = mutableMapOf<List<String>, HJsonValue>()
 
     var root: HJsonValue = HJsonUnreferencableObject()
@@ -144,10 +145,6 @@ abstract class HJsonObject : HJsonValue() {
     override fun toHJsonString(indent: String, increment: String): String {
         return when {
             0 == this.property.size -> "{}"
-            1 == this.property.size -> {
-                val it = this.property.entries.first()
-                "{ ${keyToString(it.key)} : ${it.value.toHJsonString(indent + increment, increment)} }"
-            }
             else -> {
                 val elements = this.property.map {
                     """$indent${keyToString(it.key)} : ${it.value.toHJsonString(indent + increment, increment)}"""
@@ -216,7 +213,7 @@ data class HJsonReference(
 
     override fun toHJsonString(indent: String, increment: String): String {
         val refPathStr = this.refPath.joinToString(separator = "/", prefix = "/")
-        return """{ ${HJson.REF} : $refPathStr }"""
+        return """{ ${HJson.REF} : "$refPathStr" }"""
     }
 }
 
