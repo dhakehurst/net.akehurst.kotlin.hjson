@@ -29,6 +29,7 @@ class HJsonDocument(
         val KEY = "\$key"
         val VALUE = "\$value"
         val ELEMENTS = "\$elements"
+        val ENTRIES = "\$entries"
 
         val PRIMITIVE = HJsonString("\$PRIMITIVE")
         val ARRAY = HJsonString("\$ARRAY") // TODO: ?

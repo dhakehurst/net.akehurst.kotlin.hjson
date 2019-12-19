@@ -354,7 +354,7 @@ class HJsonMapBuilder(
         obj.setProperty(HJsonDocument.TYPE, HJsonDocument.MAP)
         val elements = HJsonArray()
         elements.elements = _entries
-        obj.setProperty(HJsonDocument.ELEMENTS, elements)
+        obj.setProperty(HJsonDocument.ENTRIES, elements)
         return obj
     }
 }
