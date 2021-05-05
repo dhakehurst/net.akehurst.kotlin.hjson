@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.time.Instant
@@ -24,8 +21,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 plugins {
-    kotlin("multiplatform") version ("1.3.61") apply false
-    id("com.jfrog.bintray") version ("1.8.4") apply false
+    kotlin("multiplatform") version ("1.5.0") apply false
+    id("net.akehurst.kotlin.kt2ts") version("1.7.0") apply false
+    id("net.akehurst.kotlinx.kotlinx-reflect-gradle-plugin") version("1.4.1") apply false
 }
 
 allprojects {
@@ -46,12 +44,12 @@ fun getProjectProperty(s: String) = project.findProperty(s) as String?
 subprojects {
 
     apply(plugin = "org.jetbrains.kotlin.multiplatform")
+    apply(plugin = "net.akehurst.kotlin.kt2ts")
     apply(plugin = "maven-publish")
-    apply(plugin = "com.jfrog.bintray")
 
     repositories {
+        mavenLocal()
         mavenCentral()
-        jcenter()
     }
 
     configure<KotlinMultiplatformExtension> {
@@ -108,57 +106,16 @@ subprojects {
     tasks.getByName("compileKotlinJvm8") {
         dependsOn("generateFromTemplates")
     }
-    tasks.getByName("compileKotlinJs") {
+    tasks.getByName("compileKotlinJsIr") {
+        dependsOn("generateFromTemplates")
+    }
+    tasks.getByName("compileKotlinJsLegacy") {
         dependsOn("generateFromTemplates")
     }
 
     dependencies {
-        "commonMainImplementation"(kotlin("stdlib"))
         "commonTestImplementation"(kotlin("test"))
         "commonTestImplementation"(kotlin("test-annotations-common"))
-
-        "jvm8MainImplementation"(kotlin("stdlib-jdk8"))
-        "jvm8TestImplementation"(kotlin("test-junit"))
-
-        "jsMainImplementation"(kotlin("stdlib-js"))
-        "jsTestImplementation"(kotlin("test-js"))
     }
 
-    configure<BintrayExtension> {
-        user = getProjectProperty("bintrayUser")
-        key = getProjectProperty("bintrayApiKey")
-        publish = true
-        override = true
-        setPublications("kotlinMultiplatform", "metadata", "js", "jvm8")
-        pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-            repo = "maven"
-            name = "${rootProject.name}"
-            userOrg = user
-            websiteUrl = "https://github.com/dhakehurst/net.akehurst.kotlin.hjson"
-            vcsUrl = "https://github.com/dhakehurst/net.akehurst.kotlin.hjson"
-            setLabels("kotlin")
-            setLicenses("Apache-2.0")
-        })
-    }
-
-    val bintrayUpload by tasks.getting
-    val publishToMavenLocal by tasks.getting
-    val publishing = extensions.getByType(PublishingExtension::class.java)
-
-    bintrayUpload.dependsOn(publishToMavenLocal)
-
-    tasks.withType<BintrayUploadTask> {
-        doFirst {
-            publishing.publications
-                    .filterIsInstance<MavenPublication>()
-                    .forEach { publication ->
-                        val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
-                        if (moduleFile.exists()) {
-                            publication.artifact(object : FileBasedMavenArtifact(moduleFile) {
-                                override fun getDefaultExtension() = "module"
-                            })
-                        }
-                    }
-        }
-    }
 }

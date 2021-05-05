@@ -1,12 +1,13 @@
 package net.akehurst.hjson
 
-import com.soywiz.korio.util.expectException
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.ArrayList
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 
 @RunWith(Parameterized::class)
 class test_From_HJson_Java_Files(

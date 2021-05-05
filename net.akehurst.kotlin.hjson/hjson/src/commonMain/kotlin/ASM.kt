@@ -325,11 +325,11 @@ data class HJsonString(
 
     override fun toHJsonString(indent: String, increment: String): String {
         return when {
-            0 == this.value.length -> "\"\""
+            this.value.isEmpty() -> "\"\""
             this.value.contains("\n") -> """'''${this.encodedValue}'''"""
-            this.value.contains(Regex(",|:|\\[|]|\\{|}")) -> "\"${this.encodedValue}\""
+            this.value.contains(Regex("[,:\\[\\]{}]")) -> "\"${this.encodedValue}\""
             this.couldBeNumber -> "\"${this.encodedValue}\""
-            else -> "${this.encodedValue}"
+            else -> this.encodedValue
         }
     }
 }
