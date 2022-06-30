@@ -310,7 +310,7 @@ class test_HJsonProcessor {
         }
         """.trimIndent()
 
-        val actual = HJson.process(jsonString);
+        val actual = HJson.process(jsonString)
 
         val expected = hjson("json") {
             objectJson {

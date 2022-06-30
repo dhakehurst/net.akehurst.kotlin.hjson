@@ -15,21 +15,20 @@
  */
 
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import com.github.gmazzo.gradle.plugins.BuildConfigExtension
 import java.io.File
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 plugins {
-    kotlin("multiplatform") version ("1.5.0") apply false
-    id("net.akehurst.kotlin.kt2ts") version("1.7.0") apply false
-    id("net.akehurst.kotlinx.kotlinx-reflect-gradle-plugin") version("1.4.1") apply false
+    kotlin("multiplatform") version ("1.7.0") apply false
+    id("org.jetbrains.dokka") version ("1.7.0") apply false
+    id("com.github.gmazzo.buildconfig") version("3.1.0") apply false
+    id("nu.studer.credentials") version ("3.0")
 }
 
 allprojects {
 
     val version_project: String by project
-    val group_project = "${rootProject.name}"
+    val group_project = rootProject.name
 
     group = group_project
     version = version_project
@@ -40,16 +39,29 @@ allprojects {
 
 fun getProjectProperty(s: String) = project.findProperty(s) as String?
 
-
 subprojects {
 
-    apply(plugin = "org.jetbrains.kotlin.multiplatform")
-    apply(plugin = "net.akehurst.kotlin.kt2ts")
     apply(plugin = "maven-publish")
+    apply(plugin = "signing")
+    apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "com.github.gmazzo.buildconfig")
+    apply(plugin = "org.jetbrains.kotlin.multiplatform")
 
     repositories {
         mavenLocal()
         mavenCentral()
+    }
+
+    configure<BuildConfigExtension> {
+        val now = java.time.Instant.now()
+        fun fBbuildStamp(): String = java.time.format.DateTimeFormatter.ISO_DATE_TIME.withZone(java.time.ZoneId.of("UTC")).format(now)
+        fun fBuildDate(): String = java.time.format.DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(java.time.ZoneId.of("UTC")).format(now)
+        fun fBuildTime(): String= java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss z").withZone(java.time.ZoneId.of("UTC")).format(now)
+
+        buildConfigField("String", "version", "\"${project.version}\"")
+        buildConfigField("String", "buildStamp", "\"${fBbuildStamp()}\"")
+        buildConfigField("String", "buildDate", "\"${fBuildDate()}\"")
+        buildConfigField("String", "buildTime", "\"${fBuildTime()}\"")
     }
 
     configure<KotlinMultiplatformExtension> {
@@ -65,52 +77,11 @@ subprojects {
                 }
             }
         }
-        js("js") {
+        js("js", IR) {
+            binaries.library()
             nodejs()
             browser()
         }
-        sourceSets {
-            val commonMain by getting {
-                kotlin.srcDir("$buildDir/generated/kotlin")
-            }
-        }
-    }
-
-    val now = Instant.now()
-    fun fBbuildStamp(): String {
-        return DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(now)
-    }
-
-    fun fBuildDate(): String {
-        return DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(ZoneId.of("UTC")).format(now)
-    }
-
-    fun fBuildTime(): String {
-        return DateTimeFormatter.ofPattern("HH:mm:ss z").withZone(ZoneId.of("UTC")).format(now)
-    }
-    tasks.register<Copy>("generateFromTemplates") {
-        val templateContext = mapOf(
-                "version" to project.version,
-                "buildStamp" to fBbuildStamp(),
-                "buildDate" to fBuildDate(),
-                "buildTime" to fBuildTime()
-        )
-        inputs.properties(templateContext) // for gradle up-to-date check
-        from("src/template/kotlin")
-        into("$buildDir/generated/kotlin")
-        expand(templateContext)
-    }
-    tasks.getByName("compileKotlinMetadata") {
-        dependsOn("generateFromTemplates")
-    }
-    tasks.getByName("compileKotlinJvm8") {
-        dependsOn("generateFromTemplates")
-    }
-    tasks.getByName("compileKotlinJsIr") {
-        dependsOn("generateFromTemplates")
-    }
-    tasks.getByName("compileKotlinJsLegacy") {
-        dependsOn("generateFromTemplates")
     }
 
     dependencies {
