@@ -112,7 +112,7 @@ object HJsonParser {
         val path = Stack<String>()
         val nameStack = Stack<String>()
         val valueStack = Stack<HJsonValue>()
-        var expectPropertyStack = Stack<Boolean>()
+        val expectPropertyStack = Stack<Boolean>()
         while (scanner.hasMore()) {
             val expectProperty = if (expectPropertyStack.elements.isEmpty()) false else expectPropertyStack.peek()
             if (expectProperty) {
