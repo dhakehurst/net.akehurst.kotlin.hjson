@@ -16,54 +16,93 @@
 
 package net.akehurst.hjson
 
-import kotlin.js.JsName
+import net.akehurst.language.agl.processor.Agl
+import net.akehurst.language.agl.processor.IssueHolder
+import net.akehurst.language.agl.processor.ProcessResultDefault
+import net.akehurst.language.agl.syntaxAnalyser.ContextSimple
+import net.akehurst.language.agl.syntaxAnalyser.TypeModelFromGrammar
+import net.akehurst.language.api.processor.LanguageProcessor
+import net.akehurst.language.api.processor.LanguageProcessorPhase
 
 object HJson {
 
-    //private var _processor:LanguageProcessor? = null
-
     val REF = "\$ref"
     val KEY_WORDS = arrayOf("true", "false", "null")
-    /*
-        internal fun processor(): LanguageProcessor {
-            if (null== _processor) {
-                val grammarStr = fetchGrammarStr()
-                _processor = Agl.processor(
-                        grammarStr,
-                        SyntaxAnalyser(),
-                        Formatter()
-                )
+
+    internal val processor: LanguageProcessor<HJsonDocument, ContextSimple> by lazy {
+        val grammarStr = fetchGrammarStr()
+        val res = Agl.processorFromString(
+            grammarDefinitionStr = grammarStr,
+            Agl.configuration<HJsonDocument, ContextSimple> {
+                typeModelResolver { p ->
+                    ProcessResultDefault(
+                        TypeModelFromGrammar.createFrom(p.grammar!!),
+                        IssueHolder(LanguageProcessorPhase.ALL)
+                    )
+                }
+                syntaxAnalyserResolver { p ->
+                    ProcessResultDefault(
+                        SyntaxAnalyserHJson(),
+                        IssueHolder(LanguageProcessorPhase.ALL)
+                    )
+                }
+                semanticAnalyserResolver { p ->
+                    ProcessResultDefault(
+                        SemanticAnalyserHJson(),
+                        IssueHolder(LanguageProcessorPhase.ALL)
+                    )
+                }
             }
-            return _processor!!
+        )
+        val proc = when {
+            res.issues.errors.isEmpty() -> res.processor!!
+            else -> error(res.issues.toString())
         }
-    */
+        proc.buildFor()
+    }
+
     internal fun fetchGrammarStr(): String {
         return """
-            namespace net.akehurst.kotlin.kserialisation.json
+            namespace net.akehurst.hjson
             
-            grammar Json {
-                skip WHITE_SPACE = "\s+" ;
-
-                json = value ;
-                value = literalValue | object | array ;
-                object = '{' [ property / ',']* '}' ;
-                property = DOUBLE_QUOTE_STRING ':' value ;
-                array = '[' [ value / ',' ]* ']' ;
-                literalValue = BOOLEAN < DOUBLE_QUOTE_STRING < NUMBER < NULL ;
-                BOOLEAN             = 'true' | 'false' ;
-                NUMBER              = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-                DOUBLE_QUOTE_STRING = "\"(?:\\?(.|\n))*?\"" ;
-                NULL                = 'null' ;
-            
+            grammar HJson {
+                skip leaf WHITE_SPACE = "\s+" ;
+                skip leaf COMMENT
+                 = "/\*[^*]*\*+([^*/][^*]*\*+)*/"
+                 | "(//|#)[^\n\r]*"
+                 ;
+    
+                hjson = value ;
+                value = literal | object | array ;
+                object = '{' property* '}' ;
+                property = name ':' value ','?;
+                array = '[' arrayElements ']' ;
+                arrayElements = arrayElementsSeparated | arrayElementsSimple ;
+                arrayElementsSeparated = [ value / ',' ]* ;
+                arrayElementsSimple =  value* ;
+                name = DOUBLE_QUOTE_STRING | ID ;
+                
+                literal = string | NUMBER | BOOLEAN | NULL ;
+                string = QUOTELESS_STRING | DOUBLE_QUOTE_STRING | MULTI_LINE_STRING ;
+                
+                leaf ID = "[^\{\}\[\],:\n\r\t ]+" ;
+                leaf NULL = 'null' ;
+                leaf BOOLEAN = "true|false" ;
+                leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
+                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]+" ;
+                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
+                leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*'''" ;
             }
             
             """.trimIndent()
     }
 
-
-    @JsName("process")
     fun process(jsonString: String): HJsonDocument {
-        //return this.processor().process("json", jsonString)
-        return HJsonParser.process(jsonString)
+        val res = this.processor.process(jsonString)
+        return when {
+            res.issues.errors.isEmpty() -> res.asm!!
+            else -> throw HJsonParserException(res.issues.toString(), res.issues.errors.first().location!!.line, res.issues.errors.first().location!!.column, res.issues.errors.first().message)
+        }
+        //return HJsonParser.process(jsonString)
     }
 }

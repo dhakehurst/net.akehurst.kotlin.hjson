@@ -225,7 +225,7 @@ class test_HJsonProcessor {
 
         val actual = HJson.process(jsonString);
 
-        val expected = hjson("json") {
+        val expected = hjson("hjson") {
             objectJson {
                 property("bProp", true)
                 property("nProp", 1)
@@ -322,7 +322,6 @@ class test_HJsonProcessor {
 
     }
 
-
     @Test
     fun arrayObject() {
         val D = "$"
@@ -368,6 +367,80 @@ class test_HJsonProcessor {
                 hello
               ]
             }
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            listObject {
+                primitive(1)
+                primitive(true)
+                objectJson { }
+                primitive("hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun bug1_pass() {
+        val D = "$"
+
+        val jsonString = """
+{
+  artefactDefinition:
+  {
+    elements: [
+      {
+        class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner: {
+          type: Reference
+          ref: "#/"
+        }
+      }
+    ]
+  }
+}
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            listObject {
+                primitive(1)
+                primitive(true)
+                objectJson { }
+                primitive("hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun bug1_fail() {
+        val D = "$"
+
+        val jsonString = """
+{
+  artefactDefinition:
+  {
+    elements:
+    [
+      {
+        class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        owner:
+        {
+          type: Reference
+          ref: "#/"
+        }
+      }
+    ]
+  }
+}
         """.trimIndent()
 
         val actual = HJson.process(jsonString)

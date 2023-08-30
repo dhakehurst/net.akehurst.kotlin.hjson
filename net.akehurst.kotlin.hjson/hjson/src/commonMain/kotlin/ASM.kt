@@ -334,9 +334,12 @@ data class HJsonString(
     }
 }
 
-class HJsonArray : HJsonValue() {
+class HJsonArray(
+    initialElements:List<HJsonValue>
+) : HJsonValue() {
+    constructor() : this(emptyList())
 
-    var elements: List<HJsonValue> = mutableListOf<HJsonValue>()
+    var elements: List<HJsonValue> = initialElements.toMutableList()
 
     override fun asArray(): HJsonArray {
         return this

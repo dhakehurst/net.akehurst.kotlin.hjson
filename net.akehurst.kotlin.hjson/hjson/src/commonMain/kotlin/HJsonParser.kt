@@ -76,7 +76,7 @@ object HJsonParser {
 
     val TOKEN_WHITESPACE_OR_COMMENT = Regex("([ \\t\\f\\x0B]+)|(#(.)*\n)|(//(.)*\n)|(/[*](.|\n)*[*]/)", RegexOption.MULTILINE)
     val TOKEN_EOL_OR_WHITESPACE_OR_COMMENT = Regex("([ \\t\\f\\x0B\\r\\n]+)|(#(.)*\n)|(//(.)*\n)|(/[*](.|\n)*[*]/)", RegexOption.MULTILINE)
-    val TOKEN_TO_EOL_STRING = Regex("[^,:\\[\\]{}\n](.)*?(?:\n|$)", RegexOption.MULTILINE)
+    val TOKEN_TO_EOL_STRING = Regex("[^,:\\[\\]{}\n](.)+?(?:\n|$)", RegexOption.MULTILINE)
     val TOKEN_EOL = Regex("\n", RegexOption.MULTILINE)
     val TOKEN_QUOTED_STRING = Regex("\"(?:\\\\?(.))*?\"", RegexOption.MULTILINE)
     val TOKEN_MULTILINE_STRING = Regex("'''(?:\\\\?(.|\n))*?'''", RegexOption.MULTILINE)
@@ -104,7 +104,7 @@ object HJsonParser {
     }
 
     fun process(input: String): HJsonDocument {
-        val doc = HJsonDocument("json")
+        val doc = HJsonDocument("hjson")
         if (input.isEmpty()) {
             throw HJsonParserException("Expected Json content but input was empty", 0, 0,"")
         }
