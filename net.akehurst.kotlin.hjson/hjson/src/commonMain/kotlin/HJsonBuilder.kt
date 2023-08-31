@@ -445,9 +445,7 @@ class HJsonValueBuilder(
 
     fun reference(path:String) {
         this.validate(this)
-        // remove leading '/' then split
-        val refPath = path.substring(1).split("/").toList()
-        this.value = HJsonReference(doc,refPath)
+        this.value = HJsonReference(doc,path)
     }
 
     fun arrayJson(init: HJsonArrayBuilder.() -> Unit) {

@@ -385,6 +385,42 @@ class test_HJsonProcessor {
     }
 
     @Test
+    fun reference() {
+        val D = "$"
+
+        val jsonString = """
+            {
+              ${D}type : ${D}OBJECT
+              ${D}class : A
+              prim: 1
+              obj1: {
+                ${D}type : ${D}OBJECT
+                ${D}class : B
+                refr: { ${D}ref: "#/" }
+              }
+            }
+        """.trimIndent()
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            objectReferenceable("A") {
+                property("prim", 1)
+                property("obj1") {
+                    objectReferenceable("B") {
+                        property("refr") {
+                            reference("#/")
+                        }
+                    }
+                }
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
     fun bug1_pass() {
         val D = "$"
 
@@ -457,4 +493,5 @@ class test_HJsonProcessor {
         assertEquals(expected, actual)
 
     }
+
 }

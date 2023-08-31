@@ -21,7 +21,7 @@ class HJsonException : RuntimeException {
 }
 
 class HJsonDocument(
-        val identity: String
+    val identity: String
 ) {
     companion object {
         val TYPE = "\$type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
@@ -171,12 +171,13 @@ class HJsonUnreferencableObject : HJsonObject() {
 
     override fun asObject(): HJsonUnreferencableObject = this
 
-    override fun setProperty(key: String, value: HJsonValue): HJsonUnreferencableObject = super.setProperty(key, value) as HJsonUnreferencableObject
+    override fun setProperty(key: String, value: HJsonValue): HJsonUnreferencableObject =
+        super.setProperty(key, value) as HJsonUnreferencableObject
 }
 
 data class HJsonReferencableObject(
-        val document: HJsonDocument,
-        val path: List<String>
+    val document: HJsonDocument,
+    val path: List<String>
 ) : HJsonObject() {
 
     init {
@@ -185,18 +186,40 @@ data class HJsonReferencableObject(
 
     override fun asObject(): HJsonReferencableObject = this
 
-    override fun setProperty(key: String, value: HJsonValue): HJsonReferencableObject = super.setProperty(key, value) as HJsonReferencableObject
+    override fun setProperty(key: String, value: HJsonValue): HJsonReferencableObject =
+        super.setProperty(key, value) as HJsonReferencableObject
 
+    override fun hashCode(): Int = super.hashCode()
+    override fun equals(other: Any?): Boolean = super.equals(other)
 }
 
 data class HJsonReference(
-        val document: HJsonDocument,
-        val refPath: List<String>
+    val document: HJsonDocument,
+    val refPath: List<String>
 ) : HJsonValue() {
+
+    companion object {
+        fun stringToList(refPathStr: String): List<String> {
+            val ref = refPathStr.substringAfter("#/")
+            return when {
+                ref.isBlank() -> emptyList()
+                else -> ref.split("/")
+            }
+        }
+    }
+
+    constructor(document: HJsonDocument,refPathStr: String) : this(document, stringToList(refPathStr))
 
     val target: HJsonValue
         get() {
-            return this.document.references[refPath] ?: throw HJsonException("Reference target not found for path='${refPath.joinToString(",", prefix = "/")}'")
+            return this.document.references[refPath] ?: throw HJsonException(
+                "Reference target not found for path='${
+                    refPath.joinToString(
+                        ",",
+                        prefix = "/"
+                    )
+                }'"
+            )
         }
 
     override fun asReference(): HJsonReference {
@@ -204,7 +227,7 @@ data class HJsonReference(
     }
 
     override fun toJsonString(): String {
-        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "/")
+        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "#/")
         return """{ "${HJson.REF}" : "$refPathStr" }"""
     }
 
@@ -213,13 +236,19 @@ data class HJsonReference(
     }
 
     override fun toHJsonString(indent: String, increment: String): String {
-        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "/")
+        val refPathStr = this.refPath.joinToString(separator = "/", prefix = "#/")
         return """{ ${HJson.REF} : "$refPathStr" }"""
+    }
+
+    override fun hashCode(): Int = this.refPath.hashCode()
+    override fun equals(other: Any?): Boolean = when (other) {
+        !is HJsonReference -> false
+        else -> this.refPath == other.refPath
     }
 }
 
 data class HJsonBoolean(
-        val value: Boolean
+    val value: Boolean
 ) : HJsonValue() {
     override fun asBoolean(): HJsonBoolean {
         return this
@@ -239,7 +268,7 @@ data class HJsonBoolean(
 }
 
 data class HJsonNumber(
-        private val _value: String
+    private val _value: String
 ) : HJsonValue() {
     fun toByte(): Byte {
         return this._value.toByte()
@@ -283,33 +312,33 @@ data class HJsonNumber(
 }
 
 data class HJsonString(
-        val value: String
+    val value: String
 ) : HJsonValue() {
 
     companion object {
         fun decode(encodedValue: String): HJsonString {
             val value = encodedValue
-                    .replace("\\b", "\b")
-                    .replace("\\f", "\u000C")
-                    .replace("\\n", "\n")
-                    .replace("\\r", "\r")
-                    .replace("\\t", "\t")
-                    .replace("\\\"", "\"")
-                    .replace("\\\\", "\\")
+                .replace("\\b", "\b")
+                .replace("\\f", "\u000C")
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+                .replace("\\t", "\t")
+                .replace("\\\"", "\"")
+                .replace("\\\\", "\\")
             return HJsonString(value)
         }
     }
 
     val encodedValue: String = value
-            .replace("\\", "\\\\")
-            .replace("\b", "\\b")
-            .replace("\u000C", "\\f")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-            .replace("\"", "\\\"")
+        .replace("\\", "\\\\")
+        .replace("\b", "\\b")
+        .replace("\u000C", "\\f")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+        .replace("\"", "\\\"")
 
 
-    private val couldBeNumber : Boolean get()  =  this.value.toDoubleOrNull()!=null
+    private val couldBeNumber: Boolean get() = this.value.toDoubleOrNull() != null
 
     override fun asString(): HJsonString {
         return this
@@ -335,7 +364,7 @@ data class HJsonString(
 }
 
 class HJsonArray(
-    initialElements:List<HJsonValue>
+    initialElements: List<HJsonValue>
 ) : HJsonValue() {
     constructor() : this(emptyList())
 
@@ -359,6 +388,7 @@ class HJsonArray(
                 val element = this.elements[0].toFormattedJsonString(indent + increment, increment)
                 return "[ ${element} ]"
             }
+
             else -> {
                 val elements = this.elements.map {
                     indent + it.toFormattedJsonString(indent + increment, increment)

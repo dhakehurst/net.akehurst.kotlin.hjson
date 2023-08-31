@@ -24,10 +24,14 @@ import net.akehurst.language.api.grammar.GrammarItem
 import net.akehurst.language.api.processor.LanguageIssue
 import net.akehurst.language.api.processor.SentenceContext
 import net.akehurst.language.api.sppt.SpptDataNodeInfo
+import net.akehurst.language.collections.mutableStackOf
 
 class SyntaxAnalyserHJson(
 
 ) : SyntaxAnalyserByMethodRegistrationAbstract<HJsonDocument>() {
+
+    private var _doc = HJsonDocument("hjson")
+    private val _path = mutableStackOf<String>()
 
     override val embeddedSyntaxAnalyser: Map<String, SyntaxAnalyser<HJsonDocument>> = emptyMap()
 
@@ -43,6 +47,7 @@ class SyntaxAnalyserHJson(
         super.registerFor("value", this::value_)
         super.registerFor("object", this::object_)
         super.register(this::property)
+        super.registerForBeginHandler("property",this::property_begin)
         super.register(this::array)
         super.register(this::arrayElements)
         super.register(this::arrayElementsSeparated)
@@ -59,11 +64,16 @@ class SyntaxAnalyserHJson(
         super.register(this::MULTI_LINE_STRING)
     }
 
+    override fun clear() {
+        super.clear()
+        this._doc = HJsonDocument("hjson")
+        this._path.clear()
+    }
+
     // hjson = value ;
     fun hjson(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonDocument {
-        val doc = HJsonDocument("hjson")
-        doc.root = children[0] as HJsonValue
-        return doc
+        this._doc.root = children[0] as HJsonValue
+        return this._doc
     }
 
     // value = literal | object | array ;
@@ -71,19 +81,36 @@ class SyntaxAnalyserHJson(
         children[0] as HJsonValue
 
     // object = '{' property* '}' ;
-    fun object_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonObject {
-        val l = children[1] as List<Pair<String, HJsonValue>>? ?: emptyList()
-        val props = when {
-            l.isNotEmpty() && null==l[0] -> emptyList()
-            else -> l
+    fun object_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonValue {
+        val props = children[1] as List<Pair<String, HJsonValue>>? ?: emptyList()
+        return when {
+            //HJsonReference
+            1==props.size && props[0].first==HJson.REF && (props[0].second is HJsonString)-> {
+                val refStr = (props[0].second as HJsonString).value
+                HJsonReference(this._doc, refStr)
+            }
+
+            (props.any{it.first==HJsonDocument.TYPE && it.second is HJsonString && props[0].second == HJsonDocument.OBJECT }) ->{
+                val obj = HJsonReferencableObject(this._doc, this._path.elements.toMutableList())
+                props.forEach { (n, v) -> obj.setProperty(n, v) }
+                obj
+            }
+            else -> {
+                val obj = HJsonUnreferencableObject()
+                props.forEach { (n, v) -> obj.setProperty(n, v) }
+                 obj
+            }
         }
-        val obj = HJsonUnreferencableObject()
-        props.forEach { (n,v) -> obj.setProperty(n,v) }
-        return obj
     }
 
     // property = name ':' value ;
+    fun property_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: String) {
+        val name = nodeInfo.node.matchedTextNoSkip(sentence).substringBefore(":").trim()
+        this._path.push(name)
+    }
+
     fun property(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): Pair<String, HJsonValue> {
+        this._path.pop()
         val name = children[0] as String
         val value = children[2] as HJsonValue
         return Pair(name, value)
@@ -101,7 +128,7 @@ class SyntaxAnalyserHJson(
 
     // arrayElementsSeparated = [ value / ',' ]* ;
     fun arrayElementsSeparated(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): List<HJsonValue> =
-        (children as List<*>).toSeparatedList<HJsonValue,String>().items
+        (children as List<*>).toSeparatedList<HJsonValue, String>().items
 
     // arrayElementsSimple =  value* ;
     fun arrayElementsSimple(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): List<HJsonValue> =
@@ -110,7 +137,7 @@ class SyntaxAnalyserHJson(
     // name = DOUBLE_QUOTE_STRING | ID ;
     fun name(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): String {
         val v = children[0]
-        return when(v) {
+        return when (v) {
             is HJsonString -> v.value
             is String -> v
             else -> error("should never happen")

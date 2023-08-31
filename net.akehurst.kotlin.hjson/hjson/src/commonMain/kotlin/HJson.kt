@@ -78,7 +78,7 @@ object HJson {
                 property = name ':' value ','?;
                 array = '[' arrayElements ']' ;
                 arrayElements = arrayElementsSeparated | arrayElementsSimple ;
-                arrayElementsSeparated = [ value / ',' ]* ;
+                arrayElementsSeparated = [ value / ',' ]2+ ;
                 arrayElementsSimple =  value* ;
                 name = DOUBLE_QUOTE_STRING | ID ;
                 
@@ -91,7 +91,7 @@ object HJson {
                 leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
                 leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]+" ;
                 leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
-                leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*'''" ;
+                leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*?'''" ;
             }
             
             """.trimIndent()
