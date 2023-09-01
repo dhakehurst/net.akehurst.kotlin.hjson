@@ -18,11 +18,11 @@ package net.akehurst.hjson
 
 import net.akehurst.language.agl.collections.toSeparatedList
 import net.akehurst.language.agl.syntaxAnalyser.SyntaxAnalyserByMethodRegistrationAbstract
-import net.akehurst.language.agl.syntaxAnalyser.matchedTextNoSkip
 import net.akehurst.language.api.analyser.SyntaxAnalyser
 import net.akehurst.language.api.grammar.GrammarItem
 import net.akehurst.language.api.processor.LanguageIssue
 import net.akehurst.language.api.processor.SentenceContext
+import net.akehurst.language.api.sppt.Sentence
 import net.akehurst.language.api.sppt.SpptDataNodeInfo
 import net.akehurst.language.collections.mutableStackOf
 
@@ -71,18 +71,18 @@ class SyntaxAnalyserHJson(
     }
 
     // hjson = value ;
-    fun hjson(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonDocument {
+    fun hjson(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonDocument {
         this._doc.root = children[0] as HJsonValue
         return this._doc
     }
 
     // value = literal | object | array ;
-    fun value_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonValue =
+    fun value_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue =
         children[0] as HJsonValue
 
     // object = '{' property* '}' ;
-    fun object_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonValue {
-        val props = children[1] as List<Pair<String, HJsonValue>>? ?: emptyList()
+    fun object_(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue {
+        val props = (children[1] as List<Pair<String, HJsonValue>?>?)?.filterNotNull() ?: emptyList()
         return when {
             //HJsonReference
             1==props.size && props[0].first==HJson.REF && (props[0].second is HJsonString)-> {
@@ -104,12 +104,12 @@ class SyntaxAnalyserHJson(
     }
 
     // property = name ':' value ;
-    fun property_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: String) {
-        val name = nodeInfo.node.matchedTextNoSkip(sentence).substringBefore(":").trim()
+    fun property_begin(nodeInfo: SpptDataNodeInfo, siblings: List<Any?>, sentence: Sentence) {
+        val name = sentence.matchedTextNoSkip(nodeInfo.node).substringBefore(":").trim()
         this._path.push(name)
     }
 
-    fun property(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): Pair<String, HJsonValue> {
+    fun property(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): Pair<String, HJsonValue> {
         this._path.pop()
         val name = children[0] as String
         val value = children[2] as HJsonValue
@@ -117,25 +117,25 @@ class SyntaxAnalyserHJson(
     }
 
     // array = '[' arrayElements ']' ;
-    fun array(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonArray {
+    fun array(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonArray {
         val l = children[1] as List<HJsonValue>
         return HJsonArray(l)
     }
 
     // arrayElements = arrayElementsSeparated | arrayElementsSimple ;
-    fun arrayElements(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): List<HJsonValue> =
+    fun arrayElements(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
         children[0] as List<HJsonValue>
 
     // arrayElementsSeparated = [ value / ',' ]* ;
-    fun arrayElementsSeparated(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): List<HJsonValue> =
+    fun arrayElementsSeparated(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
         (children as List<*>).toSeparatedList<HJsonValue, String>().items
 
     // arrayElementsSimple =  value* ;
-    fun arrayElementsSimple(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): List<HJsonValue> =
+    fun arrayElementsSimple(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
         children as List<HJsonValue>
 
     // name = DOUBLE_QUOTE_STRING | ID ;
-    fun name(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): String {
+    fun name(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): String {
         val v = children[0]
         return when (v) {
             is HJsonString -> v.value
@@ -145,24 +145,24 @@ class SyntaxAnalyserHJson(
     }
 
     // literal = string | NUMBER | BOOLEAN | NULL ;
-    fun literal(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonValue =
+    fun literal(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonValue =
         children[0] as HJsonValue
 
     // string = DOUBLE_QUOTE_STRING | QUOTELESS_STRING | MULTI_LINE_STRING ;
-    fun string(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonString =
+    fun string(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString =
         children[0] as HJsonString
 
     // leaf ID = "[^\{\}\[\],:\n\r\t ]+" ;
-    fun ID(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): String =
-        nodeInfo.node.matchedTextNoSkip(sentence)
+    fun ID(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): String =
+        sentence.matchedTextNoSkip(nodeInfo.node)
 
     // leaf NULL = 'null' ;
-    fun NULL(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonNull =
+    fun NULL(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonNull =
         HJsonNull
 
     // leaf BOOLEAN = "true|false" ;
-    fun BOOLEAN(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonBoolean {
-        val str = nodeInfo.node.matchedTextNoSkip(sentence)
+    fun BOOLEAN(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonBoolean {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
         return when (str) {
             "true" -> HJsonBoolean(true)
             "false" -> HJsonBoolean(false)
@@ -171,27 +171,27 @@ class SyntaxAnalyserHJson(
     }
 
     // leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-    fun NUMBER(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonNumber {
-        val str = nodeInfo.node.matchedTextNoSkip(sentence)
+    fun NUMBER(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonNumber {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
         return HJsonNumber(str)
     }
 
     // leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]+" ;
-    fun QUOTELESS_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonString {
-        val str = nodeInfo.node.matchedTextNoSkip(sentence)
+    fun QUOTELESS_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
         return HJsonString(str)
     }
 
     // leaf DOUBLE_QUOTE_STRING = "\"([^"\\]|\\.)*\"" ;
-    fun DOUBLE_QUOTE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonString {
-        val str = nodeInfo.node.matchedTextNoSkip(sentence)
+    fun DOUBLE_QUOTE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
         val s = str.substring(1, str.length - 1)
         return HJsonString(s)
     }
 
     // leaf MULTI_LINE_STRING = "'''([^"\\]|\\.)*'''" ;
-    fun MULTI_LINE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: String): HJsonString {
-        val str = nodeInfo.node.matchedTextNoSkip(sentence)
+    fun MULTI_LINE_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
+        val str = sentence.matchedTextNoSkip(nodeInfo.node)
         val s = str.substring(3, str.length - 3)
         return HJsonString(s)
     }
