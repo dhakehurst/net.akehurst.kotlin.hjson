@@ -16,15 +16,12 @@
 
 package net.akehurst.hjson
 
-import net.akehurst.language.agl.collections.toSeparatedList
 import net.akehurst.language.agl.syntaxAnalyser.SyntaxAnalyserByMethodRegistrationAbstract
-import net.akehurst.language.api.analyser.SyntaxAnalyser
-import net.akehurst.language.api.grammar.GrammarItem
-import net.akehurst.language.api.processor.LanguageIssue
-import net.akehurst.language.api.processor.SentenceContext
 import net.akehurst.language.api.sppt.Sentence
 import net.akehurst.language.api.sppt.SpptDataNodeInfo
+import net.akehurst.language.api.syntaxAnalyser.SyntaxAnalyser
 import net.akehurst.language.collections.mutableStackOf
+import net.akehurst.language.collections.toSeparatedList
 
 class SyntaxAnalyserHJson(
 
@@ -34,13 +31,6 @@ class SyntaxAnalyserHJson(
     private val _path = mutableStackOf<String>()
 
     override val embeddedSyntaxAnalyser: Map<String, SyntaxAnalyser<HJsonDocument>> = emptyMap()
-
-    override fun configure(
-        configurationContext: SentenceContext<GrammarItem>,
-        configuration: Map<String, Any>
-    ): List<LanguageIssue> {
-        TODO("not implemented")
-    }
 
     override fun registerHandlers() {
         super.register(this::hjson)
