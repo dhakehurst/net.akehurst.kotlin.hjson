@@ -23,6 +23,12 @@ class HJsonException : RuntimeException {
 class HJsonDocument(
     val identity: String
 ) {
+
+    enum class ComplexObjectKind {
+        PRIMITIVE,ENUM,ARRAY,OBJECT,LIST,SET,MAP;
+        val asHJsonString get() = HJsonString("\$${this.name}")
+    }
+
     companion object {
         val TYPE = "\$type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
         val CLASS = "\$class"
@@ -30,13 +36,6 @@ class HJsonDocument(
         val VALUE = "\$value"
         val ELEMENTS = "\$elements"
         val ENTRIES = "\$entries"
-
-        val PRIMITIVE = HJsonString("\$PRIMITIVE")
-        val ARRAY = HJsonString("\$ARRAY") // TODO: ?
-        val OBJECT = HJsonString("\$OBJECT")
-        val LIST = HJsonString("\$LIST")
-        val MAP = HJsonString("\$MAP")
-        val SET = HJsonString("\$SET")
     }
 
     val index = mutableMapOf<List<String>, HJsonValue>()

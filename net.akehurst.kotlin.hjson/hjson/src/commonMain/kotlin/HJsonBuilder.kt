@@ -22,11 +22,12 @@ inline fun hjson(documentIdentity: String, init: HJsonDocumentBuilder.() -> Unit
     return builder.build()
 }
 
-fun Any.toJson(): HJsonValue {
+fun Any.toHJsonValue(): HJsonValue {
     return when (this) {
         is Boolean -> HJsonBoolean(this)
         is Number -> HJsonNumber(this.toString())
         is String -> HJsonString(this)
+        is Enum<*> -> HJsonString(this.name)
         else -> throw HJsonException("Cannot convert ${this::class.simpleName} to HJsonValue")
     }
 }
@@ -64,6 +65,10 @@ class HJsonDocumentBuilder(documentIdentity: String) {
 
     fun primitiveObject(className: String, value: Any) {
         this._rootBuilder.primitiveObject(className, value)
+    }
+
+    fun enumObject(className: String, value: Enum<*>) {
+        this._rootBuilder.enumObject(className,value)
     }
 
     fun arrayJson(init: HJsonArrayBuilder.() -> Unit) {
@@ -145,6 +150,12 @@ class HJsonArrayBuilder(
     fun primitiveObject(className: String, value: Any) {
         val b = HJsonValueBuilder(doc, nextPath)
         b.primitiveObject(className, value)
+        this._elements.add(b.value!!)
+    }
+
+    fun enumObject(className: String, value: Enum<*>) {
+        val b = HJsonValueBuilder(doc, nextPath)
+        b.enumObject(className, value)
         this._elements.add(b.value!!)
     }
 
@@ -250,6 +261,12 @@ class HJsonCollectionBuilder(
         this._elements.add(b.value!!)
     }
 
+    fun enumObject(className: String, value: Enum<*>) {
+        val b = HJsonValueBuilder(doc, nextPath)
+        b.enumObject(className, value)
+        this._elements.add(b.value!!)
+    }
+
     fun reference(path:String) {
         val b = HJsonValueBuilder(doc, nextPath)
         b.reference(path)
@@ -316,8 +333,8 @@ class HJsonMapBuilder(
     private val _entries = mutableListOf<HJsonUnreferencableObject>()
 
     fun entry(key: Any, value: Any) {
-        val jKey = key.toJson()
-        val jValue = value.toJson()
+        val jKey = key.toHJsonValue()
+        val jValue = value.toHJsonValue()
         val entry = HJsonUnreferencableObject()
         entry.setProperty(HJsonDocument.KEY, jKey)
         entry.setProperty(HJsonDocument.VALUE, jValue)
@@ -351,7 +368,7 @@ class HJsonMapBuilder(
 
     fun build(): HJsonUnreferencableObject {
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.MAP)
+        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.MAP.asHJsonString)
         val elements = HJsonArray()
         elements.elements = _entries
         obj.setProperty(HJsonDocument.ENTRIES, elements)
@@ -367,7 +384,7 @@ class HJsonObjectBuilder(
     private val _properties = mutableMapOf<String, HJsonValue>()
 
     fun property(key: String, value: Any?) {
-        val jValue = value?.toJson() ?: HJsonNull
+        val jValue = value?.toHJsonValue() ?: HJsonNull
         this._properties[key] = jValue
     }
 
@@ -386,7 +403,7 @@ class HJsonObjectBuilder(
 
     fun build(path: List<String>, className: String): HJsonReferencableObject {
         val obj = HJsonReferencableObject(doc, path)
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.OBJECT)
+        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString)
         obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
         _properties.forEach {
             obj.setProperty(it.key, it.value)
@@ -431,15 +448,24 @@ class HJsonValueBuilder(
 
     fun primitive(value: Any) {
         this.validate(this)
-        this.value = value.toJson()
+        this.value = value.toHJsonValue()
     }
 
     fun primitiveObject(className: String, value: Any) {
         this.validate(this)
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.PRIMITIVE)
+        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.PRIMITIVE.asHJsonString)
         obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
-        obj.setProperty(HJsonDocument.VALUE, value.toJson())
+        obj.setProperty(HJsonDocument.VALUE, value.toHJsonValue())
+        this.value = obj
+    }
+
+    fun enumObject(className: String, value: Enum<*>) {
+        this.validate(this)
+        val obj = HJsonUnreferencableObject()
+        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
+        obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
+        obj.setProperty(HJsonDocument.VALUE, value.toHJsonValue())
         this.value = obj
     }
 
@@ -459,21 +485,21 @@ class HJsonValueBuilder(
         this.validate(this)
         val builder = HJsonCollectionBuilder(doc, path)
         builder.init()
-        this.value = builder.build(HJsonDocument.ARRAY)
+        this.value = builder.build(HJsonDocument.ComplexObjectKind.ARRAY.asHJsonString)
     }
 
     fun listObject(init: HJsonCollectionBuilder.() -> Unit) {
         this.validate(this)
         val builder = HJsonCollectionBuilder(doc, path)
         builder.init()
-        this.value = builder.build(HJsonDocument.LIST)
+        this.value = builder.build(HJsonDocument.ComplexObjectKind.LIST.asHJsonString)
     }
 
     fun setObject(init: HJsonCollectionBuilder.() -> Unit) {
         this.validate(this)
         val builder = HJsonCollectionBuilder(doc, path)
         builder.init()
-        this.value = builder.build(HJsonDocument.SET)
+        this.value = builder.build(HJsonDocument.ComplexObjectKind.SET.asHJsonString)
     }
 
     fun mapObject(init: HJsonMapBuilder.() -> Unit) {

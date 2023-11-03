@@ -80,7 +80,7 @@ class SyntaxAnalyserHJson(
                 HJsonReference(this._doc, refStr)
             }
 
-            (props.any{it.first==HJsonDocument.TYPE && it.second is HJsonString && props[0].second == HJsonDocument.OBJECT }) ->{
+            (props.any{it.first==HJsonDocument.TYPE && it.second is HJsonString && props[0].second == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString }) ->{
                 val obj = HJsonReferencableObject(this._doc, this._path.elements.toMutableList())
                 props.forEach { (n, v) -> obj.setProperty(n, v) }
                 obj
@@ -118,7 +118,7 @@ class SyntaxAnalyserHJson(
 
     // arrayElementsSeparated = [ value / ',' ]* ;
     fun arrayElementsSeparated(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =
-        (children as List<*>).toSeparatedList<HJsonValue, String>().items
+        (children as List<Any>).toSeparatedList<Any, HJsonValue, String>().items
 
     // arrayElementsSimple =  value* ;
     fun arrayElementsSimple(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): List<HJsonValue> =

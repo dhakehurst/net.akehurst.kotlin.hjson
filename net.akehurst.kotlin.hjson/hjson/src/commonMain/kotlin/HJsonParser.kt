@@ -244,7 +244,7 @@ object HJsonParser {
                                     valueStack.push(ref)
                                 }
                                 // JsonReferenceableObject
-                                (peek.property.containsKey(HJsonDocument.TYPE) && peek.property[HJsonDocument.TYPE] == HJsonDocument.OBJECT) -> {
+                                (peek.property.containsKey(HJsonDocument.TYPE) && peek.property[HJsonDocument.TYPE] == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString) -> {
                                     val jPath = path.elements.toList()
                                     val obj = HJsonReferencableObject(doc, jPath)
                                     valueStack.pop()
