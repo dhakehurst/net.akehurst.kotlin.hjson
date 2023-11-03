@@ -34,24 +34,9 @@ object HJson {
         val res = Agl.processorFromString(
             grammarDefinitionStr = grammarStr,
             Agl.configuration<HJsonDocument, ContextSimple> {
-                typeModelResolver { p ->
-                    ProcessResultDefault(
-                        TypeModelFromGrammar.create(p.grammar!!),
-                        IssueHolder(LanguageProcessorPhase.ALL)
-                    )
-                }
-                syntaxAnalyserResolver { p ->
-                    ProcessResultDefault(
-                        SyntaxAnalyserHJson(),
-                        IssueHolder(LanguageProcessorPhase.ALL)
-                    )
-                }
-                semanticAnalyserResolver { p ->
-                    ProcessResultDefault(
-                        SemanticAnalyserHJson(),
-                        IssueHolder(LanguageProcessorPhase.ALL)
-                    )
-                }
+                typeModelResolver { p -> ProcessResultDefault(TypeModelFromGrammar.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
+                syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
+                semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
             }
         )
         val proc = when {
