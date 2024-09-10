@@ -16,20 +16,20 @@
 
 package net.akehurst.hjson
 
+import net.akehurst.language.agl.default.ContextAsmDefault
 import net.akehurst.language.agl.processor.IssueHolder
 import net.akehurst.language.agl.processor.SemanticAnalysisResultDefault
-import net.akehurst.language.agl.semanticAnalyser.ContextSimple
 import net.akehurst.language.api.parser.InputLocation
 import net.akehurst.language.api.processor.LanguageProcessorPhase
 import net.akehurst.language.api.processor.SemanticAnalysisOptions
 import net.akehurst.language.api.processor.SemanticAnalysisResult
 import net.akehurst.language.api.semanticAnalyser.SemanticAnalyser
 
-class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextSimple> {
+class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextAsmDefault> {
 
     override fun clear() {}
 
-    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextSimple?, options: SemanticAnalysisOptions<HJsonDocument, ContextSimple>): SemanticAnalysisResult {
+    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextAsmDefault?, options: SemanticAnalysisOptions<HJsonDocument, ContextAsmDefault>): SemanticAnalysisResult {
         return SemanticAnalysisResultDefault(IssueHolder(LanguageProcessorPhase.SEMANTIC_ANALYSIS))
     }
 }

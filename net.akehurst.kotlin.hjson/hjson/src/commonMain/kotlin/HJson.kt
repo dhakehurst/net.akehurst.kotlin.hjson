@@ -17,9 +17,10 @@
 package net.akehurst.hjson
 
 import net.akehurst.language.agl.Agl
+import net.akehurst.language.agl.default.ContextAsmDefault
 import net.akehurst.language.agl.processor.IssueHolder
 import net.akehurst.language.agl.processor.ProcessResultDefault
-import net.akehurst.language.agl.semanticAnalyser.ContextSimple
+
 import net.akehurst.language.api.processor.LanguageProcessor
 import net.akehurst.language.api.processor.LanguageProcessorPhase
 import net.akehurst.language.typemodel.simple.TypeModelSimple
@@ -29,11 +30,11 @@ object HJson {
     val REF = "\$ref"
     val KEY_WORDS = arrayOf("true", "false", "null")
 
-    internal val processor: LanguageProcessor<HJsonDocument, ContextSimple> by lazy {
+    internal val processor: LanguageProcessor<HJsonDocument, ContextAsmDefault> by lazy {
         val grammarStr = fetchGrammarStr()
         val res = Agl.processorFromString(
             grammarDefinitionStr = grammarStr,
-            Agl.configuration<HJsonDocument, ContextSimple> {
+            Agl.configuration<HJsonDocument, ContextAsmDefault> {
                 //typeModelResolver { p -> ProcessResultDefault(TypeModelSimple.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
                 syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
                 semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
