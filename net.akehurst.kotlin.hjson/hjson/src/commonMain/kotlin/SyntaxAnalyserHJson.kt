@@ -17,6 +17,8 @@
 package net.akehurst.hjson
 
 import net.akehurst.language.agl.syntaxAnalyser.SyntaxAnalyserByMethodRegistrationAbstract
+import net.akehurst.language.api.language.base.QualifiedName
+import net.akehurst.language.api.language.base.SimpleName
 import net.akehurst.language.api.sppt.Sentence
 import net.akehurst.language.api.sppt.SpptDataNodeInfo
 import net.akehurst.language.api.syntaxAnalyser.SyntaxAnalyser
@@ -30,7 +32,7 @@ class SyntaxAnalyserHJson(
     private var _doc = HJsonDocument("hjson")
     private val _path = mutableStackOf<String>()
 
-    override val embeddedSyntaxAnalyser: Map<String, SyntaxAnalyser<HJsonDocument>> = emptyMap()
+    override val embeddedSyntaxAnalyser: Map<QualifiedName, SyntaxAnalyser<HJsonDocument>> = emptyMap()
 
     override fun registerHandlers() {
         super.register(this::hjson)

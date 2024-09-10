@@ -16,13 +16,13 @@
 
 package net.akehurst.hjson
 
-import net.akehurst.language.agl.default.TypeModelFromGrammar
-import net.akehurst.language.agl.processor.Agl
+import net.akehurst.language.agl.Agl
 import net.akehurst.language.agl.processor.IssueHolder
 import net.akehurst.language.agl.processor.ProcessResultDefault
 import net.akehurst.language.agl.semanticAnalyser.ContextSimple
 import net.akehurst.language.api.processor.LanguageProcessor
 import net.akehurst.language.api.processor.LanguageProcessorPhase
+import net.akehurst.language.typemodel.simple.TypeModelSimple
 
 object HJson {
 
@@ -34,7 +34,7 @@ object HJson {
         val res = Agl.processorFromString(
             grammarDefinitionStr = grammarStr,
             Agl.configuration<HJsonDocument, ContextSimple> {
-                typeModelResolver { p -> ProcessResultDefault(TypeModelFromGrammar.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
+                //typeModelResolver { p -> ProcessResultDefault(TypeModelSimple.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
                 syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
                 semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
             }
