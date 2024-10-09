@@ -317,7 +317,7 @@ class HJsonCollectionBuilder(
 
     fun build(type: HJsonString): HJsonUnreferencableObject {
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, type)
+        obj.setProperty(HJsonDocument.KIND, type)
         val elements = HJsonArray()
         elements.elements = this._elements
         obj.setProperty(HJsonDocument.ELEMENTS, elements)
@@ -368,7 +368,7 @@ class HJsonMapBuilder(
 
     fun build(): HJsonUnreferencableObject {
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.MAP.asHJsonString)
+        obj.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.MAP.asHJsonString)
         val elements = HJsonArray()
         elements.elements = _entries
         obj.setProperty(HJsonDocument.ENTRIES, elements)
@@ -403,7 +403,7 @@ class HJsonObjectBuilder(
 
     fun build(path: List<String>, className: String): HJsonReferencableObject {
         val obj = HJsonReferencableObject(doc, path)
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString)
+        obj.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString)
         obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
         _properties.forEach {
             obj.setProperty(it.key, it.value)
@@ -454,7 +454,7 @@ class HJsonValueBuilder(
     fun primitiveObject(className: String, value: Any) {
         this.validate(this)
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.PRIMITIVE.asHJsonString)
+        obj.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.PRIMITIVE.asHJsonString)
         obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
         obj.setProperty(HJsonDocument.VALUE, value.toHJsonValue())
         this.value = obj
@@ -463,7 +463,7 @@ class HJsonValueBuilder(
     fun enumObject(className: String, value: Enum<*>) {
         this.validate(this)
         val obj = HJsonUnreferencableObject()
-        obj.setProperty(HJsonDocument.TYPE, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
+        obj.setProperty(HJsonDocument.KIND, HJsonDocument.ComplexObjectKind.ENUM.asHJsonString)
         obj.setProperty(HJsonDocument.CLASS, HJsonString(className))
         obj.setProperty(HJsonDocument.VALUE, value.toHJsonValue())
         this.value = obj

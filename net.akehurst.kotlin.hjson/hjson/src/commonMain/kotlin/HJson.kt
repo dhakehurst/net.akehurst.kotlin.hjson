@@ -17,24 +17,22 @@
 package net.akehurst.hjson
 
 import net.akehurst.language.agl.Agl
-import net.akehurst.language.agl.default.ContextAsmDefault
-import net.akehurst.language.agl.processor.IssueHolder
 import net.akehurst.language.agl.processor.ProcessResultDefault
-
+import net.akehurst.language.agl.simple.ContextAsmSimple
 import net.akehurst.language.api.processor.LanguageProcessor
-import net.akehurst.language.api.processor.LanguageProcessorPhase
-import net.akehurst.language.typemodel.simple.TypeModelSimple
+import net.akehurst.language.issues.api.LanguageProcessorPhase
+import net.akehurst.language.issues.ram.IssueHolder
 
 object HJson {
 
     val REF = "\$ref"
     val KEY_WORDS = arrayOf("true", "false", "null")
 
-    internal val processor: LanguageProcessor<HJsonDocument, ContextAsmDefault> by lazy {
+    internal val processor: LanguageProcessor<HJsonDocument, ContextAsmSimple> by lazy {
         val grammarStr = fetchGrammarStr()
         val res = Agl.processorFromString(
             grammarDefinitionStr = grammarStr,
-            Agl.configuration<HJsonDocument, ContextAsmDefault> {
+            Agl.configuration<HJsonDocument, ContextAsmSimple> {
                 //typeModelResolver { p -> ProcessResultDefault(TypeModelSimple.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
                 syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
                 semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }

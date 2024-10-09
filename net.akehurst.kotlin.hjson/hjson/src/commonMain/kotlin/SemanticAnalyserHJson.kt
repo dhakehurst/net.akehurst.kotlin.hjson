@@ -16,20 +16,20 @@
 
 package net.akehurst.hjson
 
-import net.akehurst.language.agl.default.ContextAsmDefault
-import net.akehurst.language.agl.processor.IssueHolder
 import net.akehurst.language.agl.processor.SemanticAnalysisResultDefault
-import net.akehurst.language.api.parser.InputLocation
-import net.akehurst.language.api.processor.LanguageProcessorPhase
+import net.akehurst.language.agl.simple.ContextAsmSimple
 import net.akehurst.language.api.processor.SemanticAnalysisOptions
 import net.akehurst.language.api.processor.SemanticAnalysisResult
 import net.akehurst.language.api.semanticAnalyser.SemanticAnalyser
+import net.akehurst.language.issues.api.LanguageProcessorPhase
+import net.akehurst.language.issues.ram.IssueHolder
+import net.akehurst.language.sentence.api.InputLocation
 
-class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextAsmDefault> {
+class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextAsmSimple> {
 
     override fun clear() {}
 
-    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextAsmDefault?, options: SemanticAnalysisOptions<HJsonDocument, ContextAsmDefault>): SemanticAnalysisResult {
+    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextAsmSimple?, options: SemanticAnalysisOptions<HJsonDocument, ContextAsmSimple>): SemanticAnalysisResult {
         return SemanticAnalysisResultDefault(IssueHolder(LanguageProcessorPhase.SEMANTIC_ANALYSIS))
     }
 }

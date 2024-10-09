@@ -17,13 +17,13 @@
 package net.akehurst.hjson
 
 import net.akehurst.language.agl.syntaxAnalyser.SyntaxAnalyserByMethodRegistrationAbstract
-import net.akehurst.language.api.language.base.QualifiedName
-import net.akehurst.language.api.language.base.SimpleName
-import net.akehurst.language.api.sppt.Sentence
-import net.akehurst.language.api.sppt.SpptDataNodeInfo
 import net.akehurst.language.api.syntaxAnalyser.SyntaxAnalyser
+import net.akehurst.language.base.api.QualifiedName
 import net.akehurst.language.collections.mutableStackOf
 import net.akehurst.language.collections.toSeparatedList
+import net.akehurst.language.sentence.api.Sentence
+import net.akehurst.language.sppt.api.SpptDataNodeInfo
+import net.akehurst.language.sppt.treedata.matchedTextNoSkip
 
 class SyntaxAnalyserHJson(
 
@@ -82,7 +82,7 @@ class SyntaxAnalyserHJson(
                 HJsonReference(this._doc, refStr)
             }
 
-            (props.any{it.first==HJsonDocument.TYPE && it.second is HJsonString && props[0].second == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString }) ->{
+            (props.any{it.first==HJsonDocument.KIND && it.second is HJsonString && props[0].second == HJsonDocument.ComplexObjectKind.OBJECT.asHJsonString }) ->{
                 val obj = HJsonReferencableObject(this._doc, this._path.elements.toMutableList())
                 props.forEach { (n, v) -> obj.setProperty(n, v) }
                 obj

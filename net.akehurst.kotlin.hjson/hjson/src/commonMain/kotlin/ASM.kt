@@ -25,12 +25,13 @@ class HJsonDocument(
 ) {
 
     enum class ComplexObjectKind {
-        PRIMITIVE,ENUM,ARRAY,OBJECT,LIST,SET,MAP;
+        SINGLETON, PRIMITIVE, ENUM, ARRAY, OBJECT, LIST, SET, MAP;
+
         val asHJsonString get() = HJsonString("\$${this.name}")
     }
 
     companion object {
-        val TYPE = "\$type"     // PRIMITIVE | OBJECT | LIST | SET | MAP
+        val KIND = "\$kind"     // SINGLETON | PRIMITIVE | OBJECT | LIST | SET | MAP
         val CLASS = "\$class"
         val KEY = "\$key"
         val VALUE = "\$value"
@@ -207,7 +208,7 @@ data class HJsonReference(
         }
     }
 
-    constructor(document: HJsonDocument,refPathStr: String) : this(document, stringToList(refPathStr))
+    constructor(document: HJsonDocument, refPathStr: String) : this(document, stringToList(refPathStr))
 
     val target: HJsonValue
         get() {
