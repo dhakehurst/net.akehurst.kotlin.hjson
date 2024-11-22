@@ -29,7 +29,7 @@ class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextAsmSimple> 
 
     override fun clear() {}
 
-    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextAsmSimple?, options: SemanticAnalysisOptions<HJsonDocument, ContextAsmSimple>): SemanticAnalysisResult {
+    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, context: ContextAsmSimple?, options: SemanticAnalysisOptions<ContextAsmSimple>): SemanticAnalysisResult {
         return SemanticAnalysisResultDefault(IssueHolder(LanguageProcessorPhase.SEMANTIC_ANALYSIS))
     }
 }
