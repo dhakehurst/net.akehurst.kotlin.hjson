@@ -168,9 +168,9 @@ class SyntaxAnalyserHJson(
         return HJsonNumber(str)
     }
 
-    // leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]+" ;
+    // leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*[\n]" ;
     fun QUOTELESS_STRING(nodeInfo: SpptDataNodeInfo, children: List<Any?>, sentence: Sentence): HJsonString {
-        val str = sentence.matchedTextNoSkip(nodeInfo.node)
+        val str = sentence.matchedTextNoSkip(nodeInfo.node).dropLast(1)
         return HJsonString(str)
     }
 

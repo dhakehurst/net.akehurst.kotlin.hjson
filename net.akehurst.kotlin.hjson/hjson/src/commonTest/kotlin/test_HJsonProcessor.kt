@@ -72,7 +72,7 @@ class test_HJsonProcessor {
         val actual = HJson.process(jsonString)
 
         val expected = hjson("json") {
-            primitive("00")
+            string("00")
         }
 
         assertEquals(expected, actual)
@@ -146,7 +146,96 @@ class test_HJsonProcessor {
     }
 
     @Test
-    fun array() {
+    fun array_x1_int() {
+
+        val jsonString = "[ 1 ]"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayJson {
+                number(1)
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun array_x1_boolean() {
+
+        val jsonString = "[ true ]"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayJson {
+                boolean(true)
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun array_x1_null() {
+
+        val jsonString = "[ null ]"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayJson {
+                nullValue()
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun array_x1_dblQ_string() {
+
+        val jsonString = "[ \"Hello\" ]"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayJson {
+                string("Hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun array_x1_noQ_string() {
+
+        val jsonString = """
+            [ Hello
+            ]
+        """
+
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            arrayJson {
+                string("Hello")
+            }
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun array_x4() {
 
         val jsonString = "[ 1, true, \"hello\", {} ]"
 
@@ -328,7 +417,7 @@ class test_HJsonProcessor {
 
         val jsonString = """
             {
-              ${D}type : ${D}ARRAY
+              ${D}kind : ${D}ARRAY
               ${D}elements : [
                 1
                 true
@@ -359,7 +448,7 @@ class test_HJsonProcessor {
 
         val jsonString = """
             {
-              ${D}type : ${D}LIST
+              ${D}kind : ${D}LIST
               ${D}elements : [
                 1
                 true
@@ -390,11 +479,11 @@ class test_HJsonProcessor {
 
         val jsonString = """
             {
-              ${D}type : ${D}OBJECT
+              ${D}kind : ${D}OBJECT
               ${D}class : A
               prim: 1
               obj1: {
-                ${D}type : ${D}OBJECT
+                ${D}kind : ${D}OBJECT
                 ${D}class : B
                 refr: { ${D}ref: "#/" }
               }
@@ -430,7 +519,8 @@ class test_HJsonProcessor {
   {
     elements: [
       {
-        class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
+        ${D}kind : ${D}OBJECT
+        ${D}class: de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition
         owner: {
           type: Reference
           ref: "#/"
@@ -444,12 +534,21 @@ class test_HJsonProcessor {
         val actual = HJson.process(jsonString)
 
         val expected = hjson("json") {
-            listObject {
-                primitive(1)
-                primitive(true)
-                objectJson { }
-                primitive("hello")
-            }
+           objectJson {
+               property("artefactDefinition") {
+                   objectJson {
+                       property("elements") {
+                           arrayJson {
+                               objectReferenceable("de.itemis.vistraq.traceability.computational.traceabilityInformationModel.definition.ArtefactDefinition") {
+                                   property("owner") {
+                                       reference("#/")
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+           }
         }
 
         assertEquals(expected, actual)

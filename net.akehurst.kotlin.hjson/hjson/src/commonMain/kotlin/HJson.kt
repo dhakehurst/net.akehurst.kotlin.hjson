@@ -73,7 +73,7 @@ object HJson {
                 leaf NULL = 'null' ;
                 leaf BOOLEAN = "true|false" ;
                 leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]+" ;
+                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*([\n])" ;
                 leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
                 leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*?'''" ;
             }
