@@ -56,8 +56,8 @@ class SyntaxAnalyserHJson(
         super.register(this::MULTI_LINE_STRING)
     }
 
-    override fun clear() {
-        super.clear()
+    override fun <T : Any> clear(done: Set<SyntaxAnalyser<T>>) {
+        super.clear(done)
         this._doc = HJsonDocument("hjson")
         this._path.clear()
     }

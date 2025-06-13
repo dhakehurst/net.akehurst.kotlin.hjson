@@ -18,7 +18,8 @@ package net.akehurst.hjson
 
 import net.akehurst.language.agl.Agl
 import net.akehurst.language.agl.processor.ProcessResultDefault
-import net.akehurst.language.agl.simple.ContextAsmSimple
+import net.akehurst.language.agl.simple.ContextWithScope
+
 import net.akehurst.language.api.processor.LanguageProcessor
 import net.akehurst.language.issues.api.LanguageProcessorPhase
 import net.akehurst.language.issues.ram.IssueHolder
@@ -28,14 +29,14 @@ object HJson {
     val REF = "\$ref"
     val KEY_WORDS = arrayOf("true", "false", "null")
 
-    internal val processor: LanguageProcessor<HJsonDocument, ContextAsmSimple> by lazy {
+    internal val processor: LanguageProcessor<HJsonDocument, ContextWithScope<Any,Any>> by lazy {
         val grammarStr = fetchGrammarStr()
         val res = Agl.processorFromString(
             grammarDefinitionStr = grammarStr,
-            Agl.configuration<HJsonDocument, ContextAsmSimple> {
+            Agl.configuration<HJsonDocument, ContextWithScope<Any,Any>> {
                 //typeModelResolver { p -> ProcessResultDefault(TypeModelSimple.create(p.grammar!!), IssueHolder(LanguageProcessorPhase.ALL)) }
-                syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
-                semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson(), IssueHolder(LanguageProcessorPhase.ALL)) }
+                syntaxAnalyserResolver { _ -> ProcessResultDefault(SyntaxAnalyserHJson()) }
+                semanticAnalyserResolver { _ -> ProcessResultDefault(SemanticAnalyserHJson()) }
             }
         )
         val proc = when {
@@ -52,7 +53,7 @@ object HJson {
             grammar HJson {
                 skip leaf WHITE_SPACE = "\s+" ;
                 skip leaf COMMENT
-                 = "/\*[^*]*\*+([^*/][^*]*\*+)*/"
+                 = "/\*[^*]*\\*+([^*/][^*]*\\*+)*/"
                  | "(//|#)[^\n\r]*"
                  ;
     
@@ -69,13 +70,13 @@ object HJson {
                 literal = string | NUMBER | BOOLEAN | NULL ;
                 string = QUOTELESS_STRING | DOUBLE_QUOTE_STRING | MULTI_LINE_STRING ;
                 
-                leaf ID = "[^\{\}\[\],:\n\r\t ]+" ;
+                leaf ID = "[^\\{\\}\\[\\],:\n\r\t ]+" ;
                 leaf NULL = 'null' ;
                 leaf BOOLEAN = "true|false" ;
-                leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?" ;
-                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*([\n])" ;
-                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
-                leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*?'''" ;
+                leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\\.\d+)?(?:[eE][+-]?\d+)?" ;
+                leaf QUOTELESS_STRING = "[^\\{\\}\\[\\],:\n][^\n]*([\n])" ;
+                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\\\]|\\\\.)*\"" ;
+                leaf MULTI_LINE_STRING = "'''([^\\\\]|\\\\.)*?'''" ;
             }
             
             """.trimIndent()
@@ -84,8 +85,8 @@ object HJson {
     fun process(jsonString: String): HJsonDocument {
         val res = this.processor.process(jsonString)
         return when {
-            res.issues.errors.isEmpty() -> res.asm!!
-            else -> throw HJsonParserException(res.issues.toString(), res.issues.errors.first().location!!.line, res.issues.errors.first().location!!.column, res.issues.errors.first().message)
+            res.allIssues.errors.isEmpty() -> res.asm!!
+            else -> throw HJsonParserException(res.allIssues.toString(), res.allIssues.errors.first().location!!.line, res.allIssues.errors.first().location!!.column, res.allIssues.errors.first().message)
         }
         //return HJsonParser.process(jsonString)
     }

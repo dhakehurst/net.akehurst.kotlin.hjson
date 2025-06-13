@@ -17,19 +17,19 @@
 package net.akehurst.hjson
 
 import net.akehurst.language.agl.processor.SemanticAnalysisResultDefault
-import net.akehurst.language.agl.simple.ContextAsmSimple
+import net.akehurst.language.agl.simple.ContextWithScope
 import net.akehurst.language.api.processor.SemanticAnalysisOptions
 import net.akehurst.language.api.processor.SemanticAnalysisResult
 import net.akehurst.language.api.semanticAnalyser.SemanticAnalyser
+import net.akehurst.language.api.syntaxAnalyser.LocationMap
 import net.akehurst.language.issues.api.LanguageProcessorPhase
 import net.akehurst.language.issues.ram.IssueHolder
-import net.akehurst.language.sentence.api.InputLocation
 
-class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextAsmSimple> {
+class SemanticAnalyserHJson : SemanticAnalyser<HJsonDocument, ContextWithScope<Any,Any>> {
 
     override fun clear() {}
 
-    override fun analyse(asm: HJsonDocument, locationMap: Map<Any, InputLocation>?, options: SemanticAnalysisOptions<ContextAsmSimple>): SemanticAnalysisResult {
-        return SemanticAnalysisResultDefault(IssueHolder(LanguageProcessorPhase.SEMANTIC_ANALYSIS))
+    override fun analyse(sentenceIdentity: Any?, asm: HJsonDocument, locationMap: LocationMap?, options: SemanticAnalysisOptions<ContextWithScope<Any,Any>>): SemanticAnalysisResult {
+        return SemanticAnalysisResultDefault(emptyList(),IssueHolder(LanguageProcessorPhase.SEMANTIC_ANALYSIS))
     }
 }
