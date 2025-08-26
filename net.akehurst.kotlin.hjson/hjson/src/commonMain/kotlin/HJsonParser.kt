@@ -128,7 +128,7 @@ object HJsonParser {
                     }
                     scanner.hasNext(TOKEN_PROPERTY_SEP) -> {
                         scanner.next(TOKEN_PROPERTY_SEP)
-                        val name = valueStack.pop().asString().value
+                        val name = valueStack.pop().item.asString().value
                         nameStack.push(name)
                         path.push(name)
                         expectPropertyStack.pop()
@@ -181,7 +181,7 @@ object HJsonParser {
                     scanner.hasNext(TOKEN_ARRAY_END) -> {
                         scanner.next(TOKEN_ARRAY_END)
                         path.pop()
-                        val value = valueStack.pop()
+                        val value = valueStack.pop().item
                         val peek = valueStack.peek()
                         if (peek is HJsonArray) {
                             peek.addElement(value)
@@ -193,7 +193,7 @@ object HJsonParser {
                         scanner.next(TOKEN_SEP)
                         consumeEolOrWhitespaceOrComment(scanner)
                         path.pop()
-                        val value = valueStack.pop()
+                        val value = valueStack.pop().item
                         val peek = valueStack.peek()
                         when (peek) {
                             is HJsonArray -> {
@@ -201,7 +201,7 @@ object HJsonParser {
                                 path.push(peek.elements.size.toString())
                             }
                             is HJsonObject -> {
-                                val name = nameStack.pop()
+                                val name = nameStack.pop().item
                                 peek.setProperty(name, value)
                                 expectPropertyStack.pop()
                                 expectPropertyStack.push(true)
@@ -225,10 +225,10 @@ object HJsonParser {
                         scanner.next(TOKEN_OBJECT_END)
                         expectPropertyStack.pop()
                         path.pop()
-                        val value = valueStack.pop()
+                        val value = valueStack.pop().item
                         val peek = valueStack.peek()
                         if (peek is HJsonObject) {
-                            val name = nameStack.pop()
+                            val name = nameStack.pop().item
                             peek.setProperty(name, value)
                             doc.index[listOf(*path.elements.toTypedArray())] = peek
                             // handle different kinds of object!
@@ -279,7 +279,7 @@ object HJsonParser {
                                 //must be simple value
                             } else {
                                 path.pop()
-                                val value = valueStack.pop()
+                                val value = valueStack.pop().item
                                 val peek = valueStack.peek()
                                 when (peek) {
                                     is HJsonArray -> {
@@ -287,7 +287,7 @@ object HJsonParser {
                                         path.push(peek.elements.size.toString())
                                     }
                                     is HJsonObject -> {
-                                        val name = nameStack.pop()
+                                        val name = nameStack.pop().item
                                         peek.setProperty(name, value)
                                         expectPropertyStack.pop()
                                         expectPropertyStack.push(true)
@@ -308,7 +308,7 @@ object HJsonParser {
                                 //TODO: check end of input
                             } else {
                                 path.pop()
-                                val value = valueStack.pop()
+                                val value = valueStack.pop().item
                                 val peek = valueStack.peek()
                                 when (peek) {
                                     is HJsonArray -> {
@@ -316,7 +316,7 @@ object HJsonParser {
                                         path.push(peek.elements.size.toString())
                                     }
                                     is HJsonObject -> {
-                                        val name = nameStack.pop()
+                                        val name = nameStack.pop().item
                                         peek.setProperty(name, value)
                                         expectPropertyStack.pop()
                                         expectPropertyStack.push(true)
@@ -331,7 +331,7 @@ object HJsonParser {
             }
         }
         if (1 == valueStack.elements.size) {
-            doc.root = valueStack.pop()
+            doc.root = valueStack.pop().item
         } else {
             throw HJsonParserException("invalid input,  probably an object or array is not closed", scanner.line, scanner.col, scanner.extract)
         }

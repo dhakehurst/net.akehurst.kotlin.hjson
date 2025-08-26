@@ -1,14 +1,14 @@
 [versions]
-project = "2.1.21"
+project = "2.2.0-SNAPSHOT"
 
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 dokka = "2.0.0"
-exportPublic = "2.1.21"
+exportPublic = "2.2.0"
 buildconfig = "5.5.1"
 credentials = "3.0"
 
-nal-agl-processor = "4.2.1.21"
-nak-kotlinx = "2.1.21"
+nal-agl-processor = "4.2.2.0-SNAPSHOT"
+nak-kotlinx = "2.2.0-SNAPSHOT"
 
 
 [libraries]
