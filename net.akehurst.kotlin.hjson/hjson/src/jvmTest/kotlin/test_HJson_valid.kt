@@ -1,7 +1,7 @@
 package net.akehurst.hjson
 
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import kotlin.test.BeforeTest
@@ -9,10 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-@RunWith(Parameterized::class)
-class test_HJson_valid(
-        val data: Data
-) {
+class test_HJson_valid{
 
     companion object {
 
@@ -24,7 +21,6 @@ class test_HJson_valid(
         }
 
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
         fun data(): Iterable<Array<Any>> {
             val col = mutableListOf<Array<Any>>()
             for (sourceFile in sourceFiles) {
@@ -51,8 +47,9 @@ class test_HJson_valid(
     fun setup() {
     }
 
-    @Test
-    fun test() {
+    @ParameterizedTest
+    @MethodSource("data")
+    fun test(data: Data) {
         if (data.sourceFile.startsWith("fail")) {
             assertFailsWith(HJsonParserException::class) {
                 HJson.process(data.text)

@@ -53,7 +53,7 @@ object HJson {
             grammar HJson {
                 skip leaf WHITE_SPACE = "\s+" ;
                 skip leaf COMMENT
-                 = "/\*[^*]*\\*+([^*/][^*]*\\*+)*/"
+                 = "/\*[^*]*\*+([^*/][^*]*\*+)*/"
                  | "(//|#)[^\n\r]*"
                  ;
     
@@ -70,13 +70,13 @@ object HJson {
                 literal = string | NUMBER | BOOLEAN | NULL ;
                 string = QUOTELESS_STRING | DOUBLE_QUOTE_STRING | MULTI_LINE_STRING ;
                 
-                leaf ID = "[^\\{\\}\\[\\],:\n\r\t ]+" ;
+                leaf ID = "[^\{\}\[\],:\n\r\t ]+" ;
                 leaf NULL = 'null' ;
                 leaf BOOLEAN = "true|false" ;
-                leaf NUMBER = "-?(?:0|[1-9]\d*)(?:\\.\d+)?(?:[eE][+-]?\d+)?" ;
-                leaf QUOTELESS_STRING = "[^\\{\\}\\[\\],:\n][^\n]*([\n])" ;
-                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\\\]|\\\\.)*\"" ;
-                leaf MULTI_LINE_STRING = "'''([^\\\\]|\\\\.)*?'''" ;
+                leaf NUMBER = "-?(0|[0-9]+)([.][0-9]+)?([eE][+-]?[0-9]+)?" ;
+                leaf QUOTELESS_STRING = "[^\{\}\[\],:\n][^\n]*([\n])" ;
+                leaf DOUBLE_QUOTE_STRING = "\"([^\n\"\\]|\\.)*\"" ;
+                leaf MULTI_LINE_STRING = "'''([^\\]|\\.)*?'''" ;
             }
             
             """.trimIndent()

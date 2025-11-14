@@ -95,6 +95,22 @@ class test_HJsonProcessor {
     }
 
     @Test
+    fun number_3p141() {
+
+        val jsonString = "3.141"
+
+        val actual = HJson.process(jsonString)
+
+        val expected = hjson("json") {
+            primitive(3.141)
+        }
+
+        assertEquals(expected, actual)
+
+    }
+
+
+    @Test
     fun string() {
 
         val jsonString = "\"hello\""

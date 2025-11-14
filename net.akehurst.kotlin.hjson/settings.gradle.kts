@@ -24,14 +24,17 @@ pluginManagement {
         mavenLocal()
         gradlePluginPortal()
     }
+    includeBuild("./0_build-logic")
 }
 
 
 rootProject.name = file(".").name
 
 fileTree(".") {
-    include ("**/build.gradle.kts")
-    exclude ("build.gradle.kts") // Exclude the root build file.
+    exclude("build.gradle.kts")
+    exclude("_buildSrc")
+    exclude("0_build-logic")
+    include("**/build.gradle.kts")
 }.forEach {
     val prj = it.parentFile.name
     println( "including $prj at "+relativePath(it.parent))

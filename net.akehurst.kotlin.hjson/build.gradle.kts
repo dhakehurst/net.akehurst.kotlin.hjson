@@ -22,12 +22,15 @@ plugins {
     alias(libs.plugins.kotlin) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.buildconfig) apply false
-    alias(libs.plugins.credentials) apply true
     alias(libs.plugins.exportPublic) apply false
+    alias(libs.plugins.vanniktech.maven.publish) apply false
 }
+project.layout.buildDirectory = File(rootProject.projectDir, ".gradle-build/${project.name}")
+
+/*
 val kotlin_languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
 val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
-val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 
 allprojects {
 
@@ -91,6 +94,10 @@ subprojects {
             binaries.library()
             nodejs()
             browser()
+            compilerOptions {
+                target.set("es2015")
+                freeCompilerArgs.add("-Xes-long-as-bigint")
+            }
         }
         @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
         wasmJs() {
@@ -187,3 +194,5 @@ subprojects {
         resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 }
+
+ */

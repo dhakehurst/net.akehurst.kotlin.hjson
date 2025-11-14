@@ -1,4 +1,6 @@
-
+plugins {
+    id("project-conventions")
+}
 dependencies {
     //for class Stack used in HJsonParser
     commonMainImplementation(libs.nak.kotlinx.collections)

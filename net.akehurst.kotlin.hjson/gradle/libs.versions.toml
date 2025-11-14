@@ -1,25 +1,22 @@
 [versions]
-project = "2.2.0-SNAPSHOT"
+project = "2.2.20"
 
-kotlin = "2.2.0"
-dokka = "2.0.0"
-exportPublic = "2.2.0"
-buildconfig = "5.5.1"
-credentials = "3.0"
+kotlin = "2.2.20"
+dokka = "2.1.0"
+buildconfig = "5.7.0"
 
-nal-agl-processor = "4.2.2.0-SNAPSHOT"
-nak-kotlinx = "2.2.0-SNAPSHOT"
-
+nal-agl-processor = "4.2.2.20"
+nak-kotlinx = "2.2.20"
+exportPublic = "2.2.20"
+vanniktech = "0.34.0"
 
 [libraries]
 nal-agl-processor = { module = "net.akehurst.language:agl-processor", version.ref = "nal-agl-processor" }
 nak-kotlinx-collections = { module = "net.akehurst.kotlinx:kotlinx-collections", version.ref = "nak-kotlinx" }
-nak-kotlinx-reflect = { module = "net.akehurst.kotlinx:kotlinx-reflect", version.ref = "nak-kotlinx" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
-exportPublic =  { id = "net.akehurst.kotlin.gradle.plugin.exportPublic", version.ref = "exportPublic" }
-reflect =  { id = "net.akehurst.kotlinx.kotlinx-reflect-gradle-plugin", version.ref = "nak-kotlinx" }
 buildconfig =  { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
-credentials =  { id = "nu.studer.credentials", version.ref = "credentials" }
+exportPublic =  { id = "net.akehurst.kotlin.gradle.plugin.exportPublic", version.ref = "exportPublic" }
+vanniktech-maven-publish = { id="com.vanniktech.maven.publish", version.ref="vanniktech" }
