@@ -34,11 +34,11 @@ val kotlin_apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
 val jvmTargetVersion = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 
 repositories {
-    mavenLocal {
-        content {
-            includeGroupByRegex("net\\.akehurst.+")
-        }
-    }
+//    mavenLocal {
+//        content {
+//            includeGroupByRegex("net\\.akehurst.+")
+//        }
+//    }
     mavenCentral()
     google()
     gradlePluginPortal()

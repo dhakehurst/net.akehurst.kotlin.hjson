@@ -21,7 +21,7 @@ println("===============================================")
 
 pluginManagement {
     repositories {
-        mavenLocal()
+//        mavenLocal()
         gradlePluginPortal()
     }
     includeBuild("./0_build-logic")
